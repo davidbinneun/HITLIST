@@ -2,7 +2,7 @@
 WEBSITE START
 */
 const spinner = document.getElementById("spinner");
-let tasks = [{}];
+let tasks = [];
 setMode();
 fetchTasks();
 
@@ -18,7 +18,8 @@ document.getElementById("add-button").addEventListener("click", function() {
 });
 
 // pressing on sort button
-document.getElementById("sort-button").addEventListener("click", function() {
+sortButton = document.getElementById("sort-button");
+sortButton.addEventListener("click", function() {
     let buttonText = document.getElementById('sort-button').innerText;
     if (buttonText === 'Sort by priority 🠋' || buttonText === 'Sort by priority ✖'){
         sortTasks('higherUp');
@@ -57,6 +58,41 @@ document.body.addEventListener('click', function (event) {
     }
 }, false);
 
+// pressing on a task to edit it
+document.body.addEventListener('click', event => {
+    if (event.target.className === 'todo-text') {
+        let id = event.target.parentNode.id;
+        let oldText = event.target.innerText;
+        event.target.innerText = "";
+
+        let editInput = document.createElement("INPUT");
+        editInput.classList.add("edit-input");
+        editInput.setAttribute("placeholder", oldText);
+        editInput.focus();
+
+        let editSend = document.createElement("BUTTON");
+        event.target.append(editInput);
+        editInput.focus();
+
+        const closeInput = () => {
+            event.target.innerText = oldText;
+        }
+
+        editInput.addEventListener('focusout', closeInput);
+
+        editInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                let newText = editInput.value;
+                editInput.removeEventListener('focusout', closeInput);
+
+                event.target.innerText = newText;
+                editTask(id, newText);
+            }
+        });
+
+    }
+}, false);
+
 /*
 TASK CLASS
 */
@@ -65,6 +101,7 @@ class Task{
         this.priority = priority;
         this.createdAt = getSQLDate(new Date());
         this.text = text;
+        this.id = Date.now();
     }
 }
 
@@ -89,7 +126,7 @@ function setMode() {
 // updates jsonbin.io with current tasks and refresh the tasks
 async function putTasks(){
     showSpinner();
-    fetch("https://api.jsonbin.io/v3/b/6011936f3126bb747e9fd00f",{method:"put",headers: {"Content-Type": "application/json",},body: JSON.stringify({"my-todo": tasks})})
+    fetch("http://localhost:3000/tasks",{method:"put",headers: {"Content-Type": "application/json",},body: JSON.stringify({"my-todo": tasks})})
     .then(response => {
         showTasks();
         hideSpinner();
@@ -99,10 +136,11 @@ async function putTasks(){
 // displays tasks from jsonbin.io
 function fetchTasks(){
     showSpinner();
-    fetch('https://api.jsonbin.io/v3/b/6011936f3126bb747e9fd00f/latest')
+    fetch('http://localhost:3000/tasks')
         .then(response => response.json())
-        .then(data => {tasks = data["record"]["my-todo"];
+        .then(data => {tasks = data["my-todo"];
         showTasks();
+        console.log(tasks);
         hideSpinner();
     });
 }
@@ -126,6 +164,17 @@ function deleteTask(createdAt){
     for (let i = 0; i < tasks.length; i++){
         if (tasks[i]["createdAt"] === createdAt){
             tasks.splice(i,1);
+            putTasks();
+        }
+    }
+}
+
+// edit local 
+function editTask(id, newText){
+    for (let i = 0; i < tasks.length; i++){
+        if (tasks[i].id == id){
+            tasks[i]["text"] = newText;
+            console.log(tasks);
             putTasks();
         }
     }
@@ -155,6 +204,7 @@ function showTasks(){
         for(task of tasks){
             let todoContainer = document.createElement('div');
             todoContainer.classList.add('todo-container');
+            todoContainer.setAttribute("id", task.id);
 
             let todoPriority = document.createElement('div');
             todoPriority.classList.add('todo-priority');
