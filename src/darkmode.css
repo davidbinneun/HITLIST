@@ -81,7 +81,7 @@ main {
     background-color: #10192c;
 }
 
-input {
+#text-input {
     all: unset;
     background-color: #051336;
     padding: 1%;
@@ -89,7 +89,7 @@ input {
     flex-grow: 2;
 }
 
-input:focus {
+#text-input:focus {
     box-shadow: inset 0px 0px 0px 1px #585858;
 }
 
@@ -145,6 +145,16 @@ button:active {
     display: flex;
     align-items: center;
     word-break: break-all;
+}
+
+.edit-input {
+    all: unset;
+    background-color: #051336;
+    width: 100%; 
+}
+
+.edit-input:focus {
+    box-shadow: inset 0px 0px 0px 1px #585858;
 }
 
 .todo-priority {
