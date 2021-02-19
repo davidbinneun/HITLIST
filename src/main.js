@@ -126,7 +126,7 @@ function setMode() {
 // updates jsonbin.io with current tasks and refresh the tasks
 async function putTasks(){
     showSpinner();
-    fetch("http://localhost:3000/tasks",{method:"put",headers: {"Content-Type": "application/json",},body: JSON.stringify({"my-todo": tasks})})
+    fetch("http://localhost:3000/b/tasks",{method:"put",headers: {"Content-Type": "application/json",},body: JSON.stringify({"my-todo": tasks})})
     .then(response => {
         showTasks();
         hideSpinner();
@@ -136,9 +136,9 @@ async function putTasks(){
 // displays tasks from jsonbin.io
 function fetchTasks(){
     showSpinner();
-    fetch('http://localhost:3000/tasks')
+    fetch('http://localhost:3000/b/tasks')
         .then(response => response.json())
-        .then(data => {tasks = data["my-todo"];
+        .then(data => {tasks = data["record"]["my-todo"];
         showTasks();
         console.log(tasks);
         hideSpinner();
